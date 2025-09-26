@@ -1,0 +1,43 @@
+ANALYSE DES RISQUES RÉGLEMENTAIRES - HUTCHINSON
+==================================================
+
+Date: 26/09/2025 03:00
+
+RÉSULTATS DU MATCHING:
+• Lois à impact ÉLEVÉ: 2
+• Lois à impact MOYEN: 0
+• Lois à impact FAIBLE: 2
+
+DÉTAIL DES LOIS À IMPACT ÉLEVÉ:
+1. Regulation (EU) 2025/892 on Automotive Sealing Systems
+   Score: 0.800
+   Sanctions: €2.5M per facility + €500 per component
+   Date effet: 01/07/2025
+
+2. Federal Aviation Regulation 145.67 - Aircraft Vibration Control
+   Score: 0.750
+   Sanctions: $25K-$500K + suspension 18 months
+   Date effet: 01/09/2025
+
+
+==================================================
+ANALYSE LLM:
+==================================================
+🎯 CRITICITÉ GLOBALE: 6.0/10
+⚠️ NIVEAU D'ALERTE: MODÉRÉ - Surveillance renforcée
+
+🚀 ACTIONS PRIORITAIRES:
+1. Audit de conformité immédiat pour les risques élevés
+2. Consultation juridique spécialisée
+3. Mise à jour des procédures internes
+
+💰 IMPACT FINANCIER ESTIMÉ: Moyen
+
+📅 CALENDRIER RECOMMANDÉ:
+- Semaines 1-2: Audit et évaluation détaillée
+- Mois 1-3: Mise en conformité prioritaire
+- Mois 3-6: Implémentation complète
+
+⚖️ RISQUES DE NON-CONFORMITÉ:
+- Sanctions administratives
+- Impact sur la réputation
