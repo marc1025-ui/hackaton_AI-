@@ -1,0 +1,10 @@
+# Requirements pour l'application RiskRadar - Hutchinson
+streamlit>=1.50.0
+pandas>=2.3.0
+requests>=2.32.0
+pymongo>=4.0.0
+# Modules déjà présents dans le projet principal
+# rag_system.py
+# rag_with_llm.py
+# db.py
+

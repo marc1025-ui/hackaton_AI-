@@ -29,21 +29,35 @@ class RegulatoryRiskRAGWithLLM(RegulatoryRiskRAG):
             return self._call_ollama(prompt)  # Forcer l'utilisation du LLM
 
     def _build_analysis_prompt(self, report, company_profile):
-        """Construit un prompt optimisé pour retourner UNIQUEMENT les données UI"""
+        """Construit un prompt optimisé pour retourner UNIQUEMENT les données UI basé sur le profil réel de Hutchinson"""
 
         # Extraire TOUTES les informations clés du rapport (sans limite)
         high_risks = report["detailed_analysis"]["high_risk"]  # Toutes les lois high risk
         medium_risks = report["detailed_analysis"]["medium_risk"]  # Toutes les lois medium risk
         low_risks = report["detailed_analysis"]["low_risk"]  # Toutes les lois low risk (limite supprimée)
 
+        # Construire les secteurs d'activité réels depuis le profil MongoDB
+        secteurs_reels = company_profile.get('secteur', 'automobile aerospace manufacturing industrie')
+        presence_geo = company_profile.get('presence_geographique', [])
+        matieres_premieres = company_profile.get('matieres_premieres', [])
+        secteurs_clients = company_profile.get('secteurs_clients', [])
+
         prompt = f"""Tu es un expert en conformité réglementaire. Analyse ces réglementations pour {company_profile.get('nom', 'Hutchinson')}.
 
-PROFIL ENTREPRISE HUTCHINSON:
-- Nom: Hutchinson
-- Secteurs: Automobile, Aérospatiale, Industrie, Railway
-- Activités: Sealing systems, vibration control, fluid transfer, shock absorbers
-- Matériaux: Natural rubber, synthetic rubber, steel, aluminum, elastomers
-- Pays: France, China, United States, Germany, Poland, Spain, Brazil, Mexico, India
+PROFIL RÉEL HUTCHINSON (depuis base de données):
+- Nom: {company_profile.get('nom', 'Hutchinson')}
+- Secteurs d'activité: {secteurs_reels}
+- Présence géographique: {', '.join(presence_geo[:10]) if presence_geo else 'International'}
+- Matières premières utilisées: {', '.join(matieres_premieres[:8]) if matieres_premieres else 'Caoutchouc, polymères, métaux'}
+- Secteurs clients: {', '.join(secteurs_clients) if secteurs_clients else 'Automobile, aéronautique, industrie'}
+
+ACTIVITÉS SPÉCIFIQUES HUTCHINSON:
+- Systèmes d'étanchéité (sealing systems)
+- Contrôle des vibrations (vibration control) 
+- Transfert de fluides (fluid transfer)
+- Amortisseurs et suspensions
+- Composants en caoutchouc et polymères
+- Pièces métalliques et assemblages
 
 TOUTES LES RÉGLEMENTATIONS À ANALYSER:"""
 
@@ -67,9 +81,31 @@ TOUTES LES RÉGLEMENTATIONS À ANALYSER:"""
 
         prompt += f"""
 
-Tu dois identifier UNIQUEMENT les réglementations QUI IMPACTENT DIRECTEMENT HUTCHINSON selon leurs activités.
+FILTRAGE STRICT - Tu dois identifier UNIQUEMENT les réglementations qui impactent DIRECTEMENT les activités réelles de Hutchinson.
 
-Retourne EXACTEMENT ce format JSON (seulement les lois pertinentes pour Hutchinson):
+SECTEURS D'ACTIVITÉ HUTCHINSON À MATCHER:
+✅ INCLURE SEULEMENT si la loi concerne:
+- Industrie automobile (composants, équipementiers)
+- Industrie aéronautique et aérospatiale
+- Manufacturing et production industrielle
+- Matériaux: caoutchouc, polymères, élastomères, métaux
+- Systèmes d'étanchéité et joints
+- Contrôle des vibrations et amortisseurs
+- Normes de sécurité industrielle
+- Réglementations environnementales pour l'industrie
+- Commerce international et export
+- Pays où Hutchinson opère: {', '.join(presence_geo[:8]) if presence_geo else 'France, États-Unis, Chine, Allemagne'}
+
+❌ EXCLURE TOTALEMENT si la loi concerne:
+- Industrie pharmaceutique (Hutchinson ne fait PAS de pharma)
+- Secteur médical et dispositifs médicaux
+- Agriculture et agroalimentaire
+- Services financiers et banques
+- Télécommunications et IT
+- Énergie nucléaire
+- Secteurs sans lien avec manufacturing industriel
+
+Retourne EXACTEMENT ce format JSON (SEULEMENT les lois pertinentes pour les activités réelles de Hutchinson):
 
 {{
   "indicators": [
@@ -80,32 +116,32 @@ Retourne EXACTEMENT ce format JSON (seulement les lois pertinentes pour Hutchins
       "impact_financial": 9,
       "impact_reputation": 8,
       "impact_operational": 6,
-      "notes": "Pourquoi cette loi impacte Hutchinson en 80 caractères max"
+      "notes": "Pourquoi cette loi impacte spécifiquement Hutchinson (80 chars max)",
+      "sector_match": "Secteur Hutchinson concerné (ex: automobile, aéronautique, manufacturing)"
     }}
   ]
 }}
 
-RÈGLES D'ANALYSE:
-- Impact financier (1-10): Basé sur les sanctions et amendes mentionnées
-- Impact réputation (1-10): Risque d'exposition médiatique négative
-- Impact opérationnel (1-10): Complexité de mise en conformité pour Hutchinson
-- Notes: Explication spécifique à l'activité de Hutchinson (80 caractères max)
-- law_url: OBLIGATOIRE - Utilise exactement l'URL fournie dans la section ci-dessus pour chaque loi
+RÈGLES STRICTES D'ANALYSE:
+1. VÉRIFICATION OBLIGATOIRE: La loi doit avoir un lien DIRECT avec les secteurs d'activité réels de Hutchinson
+2. Si AUCUNE loi ne correspond aux activités de Hutchinson, retourne: {{"indicators": []}}
+3. Impact financier (1-10): Basé sur les sanctions et amendes pour les activités de Hutchinson
+4. Impact réputation (1-10): Risque d'image pour un équipementier automobile/aéronautique
+5. Impact opérationnel (1-10): Complexité de mise en conformité dans les usines Hutchinson
+6. sector_match: Précise exactement quel secteur Hutchinson est concerné
+7. law_url: OBLIGATOIRE - Utilise exactement l'URL fournie dans la section ci-dessus
 
-SECTEURS HUTCHINSON À CONSIDÉRER:
-- Automotive sealing systems ➜ Réglementations automobiles
-- Aerospace vibration control ➜ Réglementations aéronautiques  
-- Manufacturing avec steel/aluminum ➜ Réglementations industrielles
-- Operations en France/US/China ➜ Réglementations géographiques
+VALIDATION FINALE:
+Avant de retourner une loi, pose-toi la question:
+"Est-ce que cette réglementation impacte réellement une entreprise qui fabrique des joints d'étanchéité, des amortisseurs et des composants en caoutchouc pour l'automobile et l'aéronautique?"
 
-IGNORER:
-- Réglementations pharmaceutiques (Hutchinson ne fait pas de pharma)
-- Réglementations sans lien avec manufacturing/automotive/aerospace
+Si la réponse est NON, n'inclus pas cette loi.
 
-IMPORTANT: 
+IMPORTANT:
 1. Retourne SEULEMENT le JSON valide avec les vraies lois pertinentes
-2. Utilise les VRAIES URLs fournies ci-dessus, pas "#"
-3. Aucun texte en plus du JSON."""
+2. Si aucune loi ne correspond, retourne un tableau vide
+3. Utilise les VRAIES URLs fournies ci-dessus, pas "#"
+4. Aucun texte en plus du JSON."""
 
         return prompt
 
@@ -193,7 +229,7 @@ IMPORTANT:
     def extract_ui_data_from_llm_response(self, llm_response):
         """
         Extrait les données JSON du LLM pour l'interface utilisateur
-        Retourne exactement les données que vous voulez pour votre UI
+        Le LLM fait directement le filtrage des secteurs pertinents
         """
         try:
             # DEBUG: Afficher la réponse brute du LLM
@@ -217,6 +253,7 @@ IMPORTANT:
                     # Vérifier que les données ont la structure attendue
                     if "indicators" in data and isinstance(data["indicators"], list):
                         print(f"✅ JSON valide trouvé avec {len(data['indicators'])} indicateurs")
+                        print(f"🤖 Le LLM a filtré et retourné {len(data['indicators'])} lois pertinentes pour Hutchinson")
                         return data
                     else:
                         print(f"⚠️  JSON sans structure 'indicators' attendue")
