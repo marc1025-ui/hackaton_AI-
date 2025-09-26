@@ -1,0 +1,38 @@
+{
+  "indicators": [
+    {
+      "law_name": "Regulation (EU) 2025/892 on Automotive Sealing Systems",
+      "law_url": "https://www.eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32025L0892",
+      "deadline": "01/07/2025",
+      "impact_financial": 9,
+      "impact_reputation": 8,
+      "impact_operational": 6,
+      "notes": "Regulation affecting Hutchinson's automotive sealing systems in Europe"
+    },
+    {
+      "law_name": "Federal Aviation Regulation 145.67 - Aircraft Vibration Control",
+      "law_url": "https://www.faa.gov/regulations_policies/faa_regulations/",
+      "deadline": "01/09/2025",
+      "impact_financial": 7,
+      "impact_reputation": 6,
+      "impact_operational": 8,
+      "notes": "Regulation affecting Hutchinson's aircraft vibration control components in the US"
+    },
+    {
+      "law_name": "Directive (EU) 2025/456 on Pharmaceutical Manufacturing",
+      "law_url": "https://www.eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32025L0456",
+      "deadline": "31/12/2025",
+      "impact_financial": 5,
+      "impact_reputation": 4,
+      "impact_operational": 7,
+      "notes": "Directive affecting Hutchinson's pharmaceutical manufacturing in the EU"
+    }
+  ],
+  "metadata": {
+    "company_name": "Entreprise",
+    "analysis_date": "26/09/2025 06:37",
+    "total_indicators": 3,
+    "llm_used": true,
+    "model": "llama2"
+  }
+}
