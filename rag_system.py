@@ -30,42 +30,79 @@ class RegulatoryRiskRAG:
     def retrieve_relevant_regulations(self, query_text, company_context=None, limit=5):
         """
         ÉTAPE 1 - RETRIEVAL : Récupère les réglementations pertinentes
+        MODIFIÉ : Récupère directement depuis la collection sans recherche vectorielle
         """
-        # Enrichir la requête avec le contexte entreprise si fourni
-        enriched_query = query_text
-        if company_context:
-            enriched_query += f" {company_context.get('secteur', '')} {company_context.get('geographie', '')}"
-
-        query_embedding = self.model.encode(enriched_query).tolist()
-
-        pipeline = [
-            {
-                "$vectorSearch": {
-                    "index": "vector_index_1",  # Nom mis à jour de l'index dans Atlas
-                    "path": "embedding",
-                    "queryVector": query_embedding,
-                    "numCandidates": 100,
-                    "limit": limit
-                }
-            },
-            {
-                "$project": {
-                    "_id": 1,
-                    "id_loi": 1,
-                    "titre": 1,
-                    "texte": 1,
-                    "date_promulgation": 1,
-                    "jurisdiction": 1,
-                    "score": {"$meta": "vectorSearchScore"}
-                }
-            }
-        ]
-
         try:
+            print(f"🔍 Récupération directe des réglementations depuis la collection...")
+
+            # Récupérer toutes les réglementations de la collection
+            results = list(self.regulations.find().limit(limit))
+
+            print(f"✅ {len(results)} réglementations trouvées dans la collection")
+
+            # Formatter les résultats pour correspondre à la structure attendue
+            formatted_results = []
+            for reg in results:
+                formatted_reg = {
+                    "_id": reg.get("_id"),
+                    "id_loi": reg.get("id_loi", str(reg.get("_id"))),
+                    "titre": reg.get("titre", reg.get("nom_loi", "Titre non disponible")),
+                    "texte": reg.get("texte", reg.get("description", "")),
+                    "date_promulgation": reg.get("date_promulgation", reg.get("date_effet")),
+                    "jurisdiction": reg.get("jurisdiction", reg.get("pays", "Non spécifiée")),
+                    "score": 0.8,  # Score fixe pour simulation
+                    "nom_loi": reg.get("nom_loi", reg.get("titre", "Loi non nommée")),
+                    "lien_loi": reg.get("lien_loi", reg.get("url", "#")),
+                    "date_effet": reg.get("date_effet"),
+                    "date_vigueur": reg.get("date_vigueur"),
+                    "sanctions": reg.get("sanctions", "Non spécifiées")
+                }
+                formatted_results.append(formatted_reg)
+
+            return formatted_results
+
+        except Exception as e:
+            print(f"❌ Erreur lors de la récupération : {e}")
+            # Fallback : essayer la recherche vectorielle si disponible
+            return self._fallback_vector_search(query_text, company_context, limit)
+
+    def _fallback_vector_search(self, query_text, company_context=None, limit=5):
+        """Fallback vers la recherche vectorielle si la récupération directe échoue"""
+        try:
+            # Enrichir la requête avec le contexte entreprise si fourni
+            enriched_query = query_text
+            if company_context:
+                enriched_query += f" {company_context.get('secteur', '')} {company_context.get('geographie', '')}"
+
+            query_embedding = self.model.encode(enriched_query).tolist()
+
+            pipeline = [
+                {
+                    "$vectorSearch": {
+                        "index": "vector_index_1",  # Nom mis à jour de l'index dans Atlas
+                        "path": "embedding",
+                        "queryVector": query_embedding,
+                        "numCandidates": 100,
+                        "limit": limit
+                    }
+                },
+                {
+                    "$project": {
+                        "_id": 1,
+                        "id_loi": 1,
+                        "titre": 1,
+                        "texte": 1,
+                        "date_promulgation": 1,
+                        "jurisdiction": 1,
+                        "score": {"$meta": "vectorSearchScore"}
+                    }
+                }
+            ]
+
             results = list(self.regulations.aggregate(pipeline))
             return results
         except Exception as e:
-            print(f"❌ Erreur lors de la récupération : {e}")
+            print(f"❌ Erreur fallback vectoriel : {e}")
             return []
 
     def analyze_regulatory_impact(self, regulations, company_profile):
