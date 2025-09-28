@@ -22,7 +22,7 @@ def setup_database():
         # Utilisé pour matcher les réglementations avec l'activité réelle
 
         # Collection 3 : Résultats des analyses d'impact calculées par l'IA
-        risk_analysis = db["risk_analysis"] 
+        risk_analysis = db["risk_analysis"]
         # Rôle : Sauvegarde les conclusions intelligentes du système
         # (scores de risque, niveaux d'impact, recommandations, zones affectées)
         # Évite de recalculer les mêmes analyses avec Ollama
@@ -39,6 +39,7 @@ def setup_database():
                 "date_effet": datetime(2024, 6, 11),
                 "date_vigueur": datetime(2026, 7, 1),
                 "pays_concernes": ["UE"],
+                "secteurs": ["Tous secteurs", "Services", "Immigration"],
                 "created_at": datetime.now()
             },
             {
@@ -51,6 +52,7 @@ def setup_database():
                 "date_effet": datetime(2025, 1, 28),
                 "date_vigueur": None,
                 "pays_concernes": ["UE"],
+                "secteurs": ["Tous secteurs", "Digital", "Manufacturing"],
                 "created_at": datetime.now()
             },
             # NOUVELLE LOI 1 - Réglementation sur les émissions automobiles (TRÈS pertinente pour Hutchinson)
@@ -83,6 +85,7 @@ This regulation enters into force on July 1, 2025, and applies to all automotive
                 "date_effet": datetime(2025, 7, 1),
                 "date_vigueur": datetime(2025, 7, 1),
                 "pays_concernes": ["UE", "France", "Germany", "Poland", "Spain"],
+                "secteurs": ["Automotive", "Manufacturing", "Sealing Systems"],
                 "created_at": datetime.now()
             },
             # NOUVELLE LOI 2 - Réglementation aérospatiale (pertinente pour Hutchinson Aerospace)
@@ -115,6 +118,7 @@ This regulation becomes effective September 1, 2025, and applies retroactively t
                 "date_effet": datetime(2025, 9, 1),
                 "date_vigueur": datetime(2025, 9, 1),
                 "pays_concernes": ["United States", "Mexico"],
+                "secteurs": ["Aerospace", "Manufacturing", "Vibration Control"],
                 "created_at": datetime.now()
             },
             # NOUVELLE LOI 3 - Réglementation sur l'industrie pharmaceutique (PAS du tout pour Hutchinson)
@@ -147,6 +151,7 @@ This directive must be transposed into national law by December 31, 2025.""",
                 "date_effet": datetime(2025, 12, 31),
                 "date_vigueur": datetime(2026, 1, 1),
                 "pays_concernes": ["UE"],
+                "secteurs": ["Pharmaceutique", "Healthcare", "Clinical Research"],
                 "created_at": datetime.now()
             }
         ]

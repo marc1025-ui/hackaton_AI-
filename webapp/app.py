@@ -219,7 +219,7 @@ def main():
     st.write("")
 
     # Boutons d'action avec analyse en temps réel
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
 
     with col1:
         if st.button("🚀 Analyse Temps Réel", key="real_time_analysis", type="primary", use_container_width=True):
@@ -229,7 +229,17 @@ def main():
         if st.button("📋 Réglementations Suivies", key="regulations_list", type="secondary", use_container_width=True):
             st.switch_page("pages/laws_list.py")
 
-    with col3:
+    # Nouvelle section pour les services spécialisés
+    st.markdown("---")
+    st.markdown("### 🏢 Services Spécialisés")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        if st.button("🛒 Service Achats", key="purchasing_service", type="primary", use_container_width=True):
+            st.switch_page("pages/purchasing_analysis.py")
+
+    with col2:
         if st.button("📊 Historique Analyses", key="analysis_history", type="secondary", use_container_width=True):
             # Afficher les dernières analyses dans un expander
             with st.expander("📈 Dernières analyses sauvegardées", expanded=True):
